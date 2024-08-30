@@ -3,66 +3,76 @@ package com.example.SB_apirest_mysql.models;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
 @Entity
+@Table(name = "user")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+	private Long id;
 
-    @NotEmpty(message = "Name cannot be empty")
-    private String name;
-    @Email(message = "Email should be valid")
-    @NotEmpty(message = "Email cannot be empty")
-    private String email;
-    @NotEmpty(message = "Password cannot be empty")
-    private String password;
-    private String phone;
+	@NotEmpty(message = "Name cannot be empty")
+	private String name;
+	@Email(message = "Email should be valid")
+	@NotEmpty(message = "Email cannot be empty")
+	private String email;
+	@NotEmpty(message = "Password cannot be empty")
+	private String password;
+	private String phone;
 
+	public User() {
+	}
 
-    public User() {
-    }
+	public User(Long id, String name, String email, String password, String phone) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.phone = phone;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getPhone() {
+		return phone;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getPhone() {
-        return phone;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
 }
