@@ -34,6 +34,15 @@ public class UserBuilder {
 
 	public User build2() {
 		User user = new User(id, name, email, password, phone);
+		return user;
+	}
+
+	public User build3() {
+		User user = new User();
+		user.setEmail(email);
+		user.setName(name);
+		user.setPassword(password);
+		user.setPhone(phone);
 
 		return user;
 	}

@@ -48,12 +48,33 @@ public class UserControllersTest {
 	@MockBean
 	private UserService userService;
 
+	/**
+	 * user
+	 */
 	private User user;
 
 	private List<User> users = new ArrayList<>();
 
 	ObjectMapper objectMapper;
 
+	/**
+	 * user de entrada para nuevo
+	 */
+	private User user4;
+
+	/**
+	 * user updated
+	 */
+	private User updatedUser;
+
+	/**
+	 * user empty
+	 */
+	User invalidUser = new User();
+
+	/**
+	 * Prepara todo lo que se trabajara
+	 */
 	@BeforeEach
 	void setUp() {
 		objectMapper = new ObjectMapper();
@@ -66,11 +87,27 @@ public class UserControllersTest {
 		User user3 = new UserBuilder().setId(3L).setName("GATSBY").setEmail("gatsby@example.com")
 				.setPassword("password123").setPhone("0987654321").build2();
 
+		user4 = new UserBuilder().setName("GATSBY").setEmail("gatsby@example.com").setPassword("1234")
+				.setPhone("1234567890").build3();
+
+		updatedUser = new UserBuilder().setEmail("updated.email@email.com").setId(1L).setName("Luis Updated")
+				.setPassword("54321").setPhone("0987654321").build();
+
 		users.add(user);
 		users.add(user2);
 		users.add(user3);
+
+		BindingResult bindingResult = new BeanPropertyBindingResult(invalidUser, "user");
+		bindingResult.rejectValue("name", "errorCode", "Name cannot be empty");
+		bindingResult.rejectValue("email", "errorCode", "Email cannot be empty");
+		bindingResult.rejectValue("password", "errorCode", "Password cannot be empty");
 	}
 
+	/**
+	 * Prueba cuando hay un Internal Server Error en DeleteUser
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testDeleteUserInternalServerError() throws Exception {
 		when(userService.findById(1L)).thenReturn(Optional.of(new User()));
@@ -82,19 +119,26 @@ public class UserControllersTest {
 		verify(userService).deleteById(1L);
 	}
 
+	/**
+	 * Prueba cuando no encuentra un User
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testDeleteUserNotFound() throws Exception {
 		when(userService.findById(1L)).thenReturn(Optional.empty());
-		// doThrow(new RuntimeException("Internal server
-		// error")).when(userService).deleteById(1L);
 
 		mvc.perform(delete("/api/users/1")).andExpect(status().isNotFound());
 
 		verify(userService).findById(1L);
 		verify(userService, never()).deleteById(1L);
-		// verify(userService).deleteById(1L);
 	}
 
+	/**
+	 * Prueba cuando un usuario se elimino
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testDeleteUserSuccess() throws Exception {
 		when(userService.findById(1L)).thenReturn(Optional.of(new User()));
@@ -105,6 +149,11 @@ public class UserControllersTest {
 		verify(userService).deleteById(1L);
 	}
 
+	/**
+	 * Prueba cuando obtiene todos los usuarios
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testGetAllUsers() throws Exception {
 
@@ -124,6 +173,11 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando hay una excepcion al obtener todos los usuarios
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testGetAllUsersExcepcion() throws Exception {
 
@@ -136,6 +190,11 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando obtiene un usuario
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testGetOneUser() throws Exception {
 
@@ -151,6 +210,11 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando hay una excepcion al obtener un usuario
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testGetOneUserException() throws Exception {
 
@@ -163,6 +227,11 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando no encontro un usuario
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testGetOneUserNotFound() throws Exception {
 		when(userService.findById(1L)).thenReturn(Optional.empty());
@@ -172,29 +241,31 @@ public class UserControllersTest {
 		verify(userService).findById(1L);
 	}
 
+	/**
+	 * Prueba cuando se crea un nuevo usuario
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testNewUser() throws Exception {
 
-		User user = new User();
-		user.setName("Luis");
-		user.setEmail("email@email.com");
-		user.setPassword("12345");
-		user.setPhone("1234567890");
-
-		when(userService.save(any(User.class))).thenReturn(user);
-
-		System.out.println(user);
+		when(userService.save(any(User.class))).thenReturn(user4);
 
 		mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(user))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.user.name").value("Luis"))
-				.andExpect(jsonPath("$.user.email").value("email@email.com"))
-				.andExpect(jsonPath("$.user.password").value("12345"))
+				.content(objectMapper.writeValueAsString(user4))).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.user.name").value("GATSBY"))
+				.andExpect(jsonPath("$.user.email").value("gatsby@example.com"))
+				.andExpect(jsonPath("$.user.password").value("1234"))
 				.andExpect(jsonPath("$.user.phone").value("1234567890"));
 
 		verify(userService).save(any(User.class));
 	}
 
+	/**
+	 * Prueba cuando hay un Bad Request al crear un nuevo usuario
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testNewUserBadRequest() throws Exception {
 
@@ -205,6 +276,11 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando hay un Internal Error al crear un usuario
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testNewUserInternalError() throws Exception {
 
@@ -215,16 +291,13 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando hay campos vacios y devuelve las validaciones
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testNewUserValidationErrors() throws Exception {
-		User invalidUser = new User();
-
-		BindingResult bindingResult = new BeanPropertyBindingResult(invalidUser, "user");
-		bindingResult.rejectValue("name", "errorCode", "Error message");
-		bindingResult.rejectValue("password", "errorCode", "Password cannot be empty");
-		bindingResult.rejectValue("email", "errorCode", "Email cannot be empty");
-
-		when(userService.save(any(User.class))).thenThrow(new ConstraintViolationException("Validation error", null));
 
 		mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON).content(asJsonString(invalidUser)))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Validation failed"))
@@ -233,23 +306,15 @@ public class UserControllersTest {
 				.andExpect(jsonPath("$.email").value("Email cannot be empty"));
 	}
 
+	/**
+	 * Prueba de usuario actualizado
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testUpdateUser() throws Exception {
-		User existingUser = new User();
-		existingUser.setId(1L);
-		existingUser.setName("Luis");
-		existingUser.setEmail("email@email.com");
-		existingUser.setPassword("12345");
-		existingUser.setPhone("1234567890");
 
-		User updatedUser = new User();
-		updatedUser.setId(1L);
-		updatedUser.setName("Luis Updated");
-		updatedUser.setEmail("updated.email@email.com");
-		updatedUser.setPassword("54321");
-		updatedUser.setPhone("0987654321");
-
-		when(userService.findById(1L)).thenReturn(Optional.of(existingUser));
+		when(userService.findById(1L)).thenReturn(Optional.of(user));
 		when(userService.update(any(User.class))).thenReturn(updatedUser);
 
 		mvc.perform(put("/api/users/1").contentType(MediaType.APPLICATION_JSON)
@@ -263,23 +328,15 @@ public class UserControllersTest {
 		verify(userService).update(any(User.class));
 	}
 
+	/**
+	 * Prueba cuando hay un bad request en update
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testUpdateUserBadRequest() throws Exception {
-		User existingUser = new User();
-		existingUser.setId(1L);
-		existingUser.setName("Luis");
-		existingUser.setEmail("email@email.com");
-		existingUser.setPassword("12345");
-		existingUser.setPhone("1234567890");
 
-		User updatedUser = new User();
-		updatedUser.setId(1L);
-		updatedUser.setName("Luis Updated");
-		updatedUser.setEmail("updated.email@email.com");
-		updatedUser.setPassword("54321");
-		updatedUser.setPhone("0987654321");
-
-		when(userService.findById(1L)).thenReturn(Optional.of(existingUser));
+		when(userService.findById(1L)).thenReturn(Optional.of(user));
 		when(userService.update(any(User.class)))
 				.thenThrow(new ConstraintViolationException("There was a error", null));
 
@@ -290,23 +347,14 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando hay un Internal Error en update
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testUpdateUserInternalError() throws Exception {
-		User existingUser = new User();
-		existingUser.setId(1L);
-		existingUser.setName("Luis");
-		existingUser.setEmail("email@email.com");
-		existingUser.setPassword("12345");
-		existingUser.setPhone("1234567890");
-
-		User updatedUser = new User();
-		updatedUser.setId(1L);
-		updatedUser.setName("Luis Updated");
-		updatedUser.setEmail("updated.email@email.com");
-		updatedUser.setPassword("54321");
-		updatedUser.setPhone("0987654321");
-
-		when(userService.findById(1L)).thenReturn(Optional.of(existingUser));
+		when(userService.findById(1L)).thenReturn(Optional.of(user));
 		when(userService.update(any(User.class))).thenThrow(new RuntimeException("There was a error."));
 
 		mvc.perform(put("/api/users/1").contentType(MediaType.APPLICATION_JSON)
@@ -316,21 +364,13 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando no encuentra un usuario para actualizarlo
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testUpdateUserNotFound() throws Exception {
-		User existingUser = new User();
-		existingUser.setId(1L);
-		existingUser.setName("Luis");
-		existingUser.setEmail("email@email.com");
-		existingUser.setPassword("12345");
-		existingUser.setPhone("1234567890");
-
-		User updatedUser = new User();
-		updatedUser.setId(1L);
-		updatedUser.setName("Luis Updated");
-		updatedUser.setEmail("updated.email@email.com");
-		updatedUser.setPassword("54321");
-		updatedUser.setPhone("0987654321");
 
 		when(userService.findById(1L)).thenReturn(Optional.empty());
 		when(userService.update(any(User.class))).thenThrow(new RuntimeException("There was a error."));
@@ -343,18 +383,15 @@ public class UserControllersTest {
 
 	}
 
+	/**
+	 * Prueba cuando hay validaciones en update
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void testUpdateUserValidationErrors() throws Exception {
-		User invalidUser = new User();
-
-		BindingResult bindingResult = new BeanPropertyBindingResult(invalidUser, "user");
-		bindingResult.rejectValue("name", "errorCode", "Name cannot be empty");
-		bindingResult.rejectValue("email", "errorCode", "Email cannot be empty");
-		bindingResult.rejectValue("password", "errorCode", "Password cannot be empty");
 
 		when(userService.findById(anyLong())).thenReturn(Optional.of(new User()));
-
-		when(userService.update(any(User.class))).thenThrow(new ConstraintViolationException("Validation error", null));
 
 		mvc.perform(put("/api/users/1").contentType(MediaType.APPLICATION_JSON).content(asJsonString(invalidUser)))
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Validation failed"))

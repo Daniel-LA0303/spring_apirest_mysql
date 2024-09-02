@@ -17,11 +17,14 @@ public class User {
 
 	@NotEmpty(message = "Name cannot be empty")
 	private String name;
+
 	@Email(message = "Email should be valid")
 	@NotEmpty(message = "Email cannot be empty")
 	private String email;
+
 	@NotEmpty(message = "Password cannot be empty")
 	private String password;
+
 	private String phone;
 
 	public User() {
