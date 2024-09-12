@@ -7,6 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 class SbApirestMysqlApplicationTests {
 
 	@Test
+	public void main() {
+		SbApirestMysqlApplication.main(new String[] {});
+	}
+
+	@Test
 	void contextLoads() {
 	}
 
